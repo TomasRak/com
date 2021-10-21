@@ -1,13 +1,57 @@
 body {
+  text-align: center;
+  background-color: #282c34;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family: 'Ubuntu';
+  /* user-select: none; */
+  /* -webkit-font-smoothing: antialiased; */
+  /* -moz-osx-font-smoothing: grayscale; */
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.tableRow:hover {
+  /* transition: background-color .01s; */
+  background-color: #cfcfcf;
+  cursor: pointer;
+  /* cursor: not-allowed; */
+}
+
+.tableRow {
+  /* font-size: 50px; */
+}
+
+.fullTableRow {
+  background-color: #ffadad;
+}
+
+.table {
+  /* width: 20px; */
+}
+
+/* .MuiTableRow-root {
+  outline-color: #0055ff !important;
+} */
+
+.formGroup {
+  width: 500px
+}
+
+.project {
+  float: left;
+  /* margin-left: -12px; */
+  margin-top: 5px;
+}
+
+.projectDesc {
+  display:inline;
+}
+
+.appWrapper {
+  color: white;
+  font-size: 30px;
+}
+
+.tableWrapper {
+  width: 450px;
+  display: inline-grid;
+  margin: 10px;
 }
