@@ -1,6 +1,7 @@
 body {
   text-align: center;
-  background-color: #282c34;
+  background-color: #239ceb;
+  /* background-color: #282c34; React default color*/
   margin: 0;
   font-family: 'Ubuntu';
   /* user-select: none; */
@@ -10,17 +11,18 @@ body {
 
 .tableRow:hover {
   /* transition: background-color .01s; */
-  background-color: #cfcfcf;
+  background-color: #239ceb;
   cursor: pointer;
   /* cursor: not-allowed; */
 }
 
 .tableRow {
   /* font-size: 50px; */
+  background-color: #84c7f2;
 }
 
 .fullTableRow {
-  background-color: #ffadad;
+  background-color: #ff6666;
 }
 
 .table {

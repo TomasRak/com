@@ -25,10 +25,8 @@ const ReservationCalendar = (() => {
   const [tableMonths, setTableMonths] = React.useState<Array<TableMonth>>();
 
   React.useEffect(() => {
-    console.log("THIS IT ???!??!XDDD: ", dbOrders)
     var array = new Array<TableMonth>();
     if (dbOrders) {
-      console.log("IM IN")
       for (var i = 1; i <= 12; i++) {
         var daysForMonth = new Array<Order>()
         var diM = daysInMonth(i, 2021);
@@ -36,14 +34,7 @@ const ReservationCalendar = (() => {
         for (var y = 1; y <= diM; y++) {
           var newDate = new Date(`${i}.${y}.2021 12:00:00`);
           var maybeNewOrder = {
-            date: newDate,
-            city: "",
-            name: "",
-            email: "",
-            phone: "",
-            project: false,
-            description: ""
-          } as Order
+            date: newDate, city: "", name: "", email: "", phone: "", project: false, description: ""} as Order
 
           for (var dbOrder of dbOrders as Order[]) {
             if (newDate.toLocaleDateString() == dbOrder.date.toLocaleDateString()) {
