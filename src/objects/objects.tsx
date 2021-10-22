@@ -14,4 +14,4 @@ type TableMonth = {
     days: Order[]
 }
 
-export type {Order, TableMonth}
+export type { Order, TableMonth }

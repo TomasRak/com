@@ -26,6 +26,7 @@ body {
 }
 
 .table {
+    white-space: nowrap;
   /* width: 20px; */
 }
 
@@ -53,7 +54,15 @@ body {
 }
 
 .tableWrapper {
-  width: 450px;
+  width: 600px;
   display: inline-grid;
   margin: 10px;
+}
+
+.icon {
+    width: 15px !important;
+    height: 15px !important;
+    margin-bottom: -3px;
+    transform: scale(1.5);
+    /* margin-top:2px; */
 }

@@ -21,9 +21,31 @@ interface FormDialogProps {
     setActiveRow: any
 }
 
+
 export const FormDialog = ((props: FormDialogProps) => {
     const { setActiveRow, activeRow } = props
-    
+
+    const validateEditOrder = ((editOrder: Order): boolean => {
+        var errorObj = {} as any
+        errorObj.name = editOrder.name == ""
+        errorObj.city = editOrder.city == ""
+        errorObj.email = editOrder.email == ""
+
+        var isValid = !(errorObj.date || errorObj.city || errorObj.email);
+        if (!isValid) setEditOrderErrors(errorObj)
+        return isValid;
+    })
+
+    var [editOrderErrors, setEditOrderErrors] = React.useState({
+        date: false,
+        city: false,
+        name: false,
+        email: false,
+        phone: false,
+        project: false,
+        description: false
+    });
+
     var [editOrder, setEditOrder] = React.useState<Order>(activeRow)
 
     React.useEffect(() => {
@@ -35,10 +57,13 @@ export const FormDialog = ((props: FormDialogProps) => {
     };
 
     const handleConfirm = () => {
-        console.log("project: ", editOrder.project)
-        console.log("postSucessfull?: ", postOrder(editOrder))
-        setActiveRow(null);
+        if (validateEditOrder(editOrder)) {
+            console.log("postSucessfull?: ", postOrder(editOrder))
+            setActiveRow(null);
+        }
     };
+
+    var autoComplete = false;
     return (
         <div>
             <Dialog open={activeRow != null} onClose={handleCancel}>
@@ -49,10 +74,14 @@ export const FormDialog = ((props: FormDialogProps) => {
                     </DialogContentText>
                     <div className="formGroup">
                         <TextField
+                            autoComplete= {autoComplete ? 'on' : 'off'}
                             value={editOrder.city}
                             onChange={((e) => {
+                                if (editOrderErrors.city) setEditOrderErrors({ ...editOrderErrors, city: false })
                                 setEditOrder({ ...editOrder, city: e.target.value })
                             })}
+                            error={editOrderErrors.city}
+                            helperText={editOrderErrors.city ? "Město musí být vyplněno!" : ""}
                             margin="dense"
                             id="mesto"
                             label="Město"
@@ -61,10 +90,14 @@ export const FormDialog = ((props: FormDialogProps) => {
                             required={true}
                         />
                         <TextField
+                            autoComplete= {autoComplete ? 'on' : 'off'}
                             value={editOrder.name}
                             onChange={((e) => {
+                                if (editOrderErrors.name) setEditOrderErrors({ ...editOrderErrors, name: false })
                                 setEditOrder({ ...editOrder, name: e.target.value })
                             })}
+                            error={editOrderErrors.name}
+                            helperText={editOrderErrors.name ? "Název musí být vyplněn!" : ""}
                             autoFocus
                             margin="dense"
                             id="nazev"
@@ -74,10 +107,14 @@ export const FormDialog = ((props: FormDialogProps) => {
                             required={true}
                         />
                         <TextField
+                            autoComplete= {autoComplete ? 'on' : 'off'}
                             value={editOrder.email}
                             onChange={((e) => {
+                                if (editOrderErrors.email) setEditOrderErrors({ ...editOrderErrors, email: false })
                                 setEditOrder({ ...editOrder, email: e.target.value })
                             })}
+                            error={editOrderErrors.email}
+                            helperText={editOrderErrors.email ? "Email musí být vyplněn!" : ""}
                             autoFocus
                             margin="dense"
                             id="mail"
@@ -87,6 +124,7 @@ export const FormDialog = ((props: FormDialogProps) => {
                             required={true}
                         />
                         <TextField
+                            autoComplete= {autoComplete ? 'on' : 'off'}
                             value={editOrder.phone}
                             onChange={((e) => {
                                 setEditOrder({ ...editOrder, phone: e.target.value })
@@ -99,6 +137,7 @@ export const FormDialog = ((props: FormDialogProps) => {
                             variant="outlined"
                         />
                         <TextField
+                            autoComplete= {autoComplete ? 'on' : 'off'}
                             value={editOrder.description}
                             onChange={((e) => {
                                 setEditOrder({ ...editOrder, description: e.target.value })
@@ -116,7 +155,7 @@ export const FormDialog = ((props: FormDialogProps) => {
                             <Checkbox
                                 value={editOrder.project}
                                 onChange={((e) => {
-                                    setEditOrder({ ...editOrder, project: e.target.value == '1'})
+                                    setEditOrder({ ...editOrder, project: e.target.value == '1' })
                                 })}
                                 id="Projekt"
                             />

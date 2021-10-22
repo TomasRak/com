@@ -8,136 +8,132 @@ import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
-import Checkbox from '@mui/material/Checkbox';
+import CheckIcon from '@mui/icons-material/Check';
+import CloseIcon from '@mui/icons-material/Close';
 
 import { Order, TableMonth } from '../../objects/objects'
 import { FormDialog } from '../FormDialog';
 
 const monthsCzech = ["Leden", "Únor", "Březen", "Duben", "Květen", "Červen", "Červenec", "Srpen", "Září", "Říjen", "Listopad", "Prosinec"]
 
-function daysInMonth(month: number, year: number) {
-  return new Date(year, month, 0).getDate();
+const daysInMonth = (month: number, year: number) => {
+    return new Date(year, month, 0).getDate();
 }
 
+const formatDate = (d: Date) => {
+    return `${d.getDate().toString()
+        .padStart(2, '0')}.${(d.getMonth() + 1).toString()
+            .padStart(2, '0')}.${d.getFullYear()}`;
+};
+
 const ReservationCalendar = (() => {
-  const [activeRow, setActiveRow] = React.useState<Order>();
-  const [dbOrders, setDbOrders] = React.useState<Order[]>();
-  const [tableMonths, setTableMonths] = React.useState<Array<TableMonth>>();
+    const [activeRow, setActiveRow] = React.useState<Order>();
+    const [tableMonths, setTableMonths] = React.useState<Array<TableMonth>>();
 
-  React.useEffect(() => {
-    var array = new Array<TableMonth>();
-    if (dbOrders) {
-      for (var i = 1; i <= 12; i++) {
-        var daysForMonth = new Array<Order>()
-        var diM = daysInMonth(i, 2021);
+    const fillTables = ((dbOrders: Order[]): any => {
+        var tableMonthsArr = new Array<TableMonth>();
+        if (dbOrders) {
+            for (var month = 1; month <= 12; month++) {
+                var daysForMonth = new Array<Order>()
+                var diM = daysInMonth(month, 2021);
 
-        for (var y = 1; y <= diM; y++) {
-          var newDate = new Date(`${i}.${y}.2021 12:00:00`);
-          var maybeNewOrder = {
-            date: newDate, city: "", name: "", email: "", phone: "", project: false, description: ""} as Order
+                for (var day = 1; day <= diM; day++) {
+                    var newDate = new Date(`$${month}.${day}.2021 12:00:00`);
+                    var maybeNewOrder = {
+                        date: newDate, city: "", name: "", email: "", phone: "", project: false, description: ""
+                    } as Order
 
-          for (var dbOrder of dbOrders as Order[]) {
-            if (newDate.toLocaleDateString() == dbOrder.date.toLocaleDateString()) {
-                console.log("in if")
-                maybeNewOrder.date = dbOrder.date
-                maybeNewOrder.city = dbOrder.city
-                maybeNewOrder.name = dbOrder.name
-                maybeNewOrder.email = dbOrder.email
-                maybeNewOrder.phone = dbOrder.phone
-                maybeNewOrder.project = dbOrder.project
-                maybeNewOrder.description = dbOrder.description
+                    for (var dbOrder of dbOrders as Order[]) {
+                        if (newDate.toLocaleDateString() == dbOrder.date.toLocaleDateString()) {
+                            maybeNewOrder.date = dbOrder.date
+                            maybeNewOrder.city = dbOrder.city
+                            maybeNewOrder.name = dbOrder.name
+                            maybeNewOrder.email = dbOrder.email
+                            maybeNewOrder.phone = dbOrder.phone
+                            maybeNewOrder.project = dbOrder.project
+                            maybeNewOrder.description = dbOrder.description
+                        }
+                    }
+                    daysForMonth.push(maybeNewOrder)
+                }
+
+                tableMonthsArr.push({
+                    number: month,
+                    name: monthsCzech[month - 1],
+                    days: daysForMonth
+                })
             }
-          }
-
-          daysForMonth.push(maybeNewOrder)
         }
+        setTableMonths(tableMonthsArr);
+    })
 
-        array.push({
-          number: i,
-          name: monthsCzech[i - 1],
-          days: daysForMonth
-        })
-      }
-    }
-    setTableMonths(array);
-  }, [dbOrders])
+    React.useEffect(() => {
+        (async () => {
+            var dbOrders = await getOrders() as Order[]
+            fillTables(dbOrders);
+        })()
+    }, [activeRow])
 
-  React.useEffect(() => {
-    (async () => {
-      var apiRespData = await getOrders() as Order[]
-      for (var order of apiRespData) {
-        order.date = new Date(order.date)
-      }
-      console.log("this returned: ", apiRespData)
-      setDbOrders(apiRespData);
-    })()
-  }, [activeRow])
+    React.useEffect(() => {
+        (async () => {
+            var dbOrders = await getOrders() as Order[]
+            fillTables(dbOrders);
+        })()
+    }, [])
 
-  React.useEffect(() => {
-    (async () => {
-      var apiRespData = await getOrders() as Order[]
-      for (var order of apiRespData) {
-        order.date = new Date(order.date)
-      }
-      console.log("this returned: ", apiRespData)
-      setDbOrders(apiRespData);
-    })()
-  }, [])
+    const handleClick = ((x: Order) => {
+        setActiveRow(x)
+        console.log("clicked: ", x)
+    })
 
-  const handleClick = ((x: Order) => {
-    setActiveRow(x)
-    console.log("clicked: ", x)
-  })
-
-  return (
-    <div className="App appWrapper">
-      {activeRow ?
-        <FormDialog
-          setActiveRow={setActiveRow}
-          activeRow={activeRow as Order}
-        />
-        :
-        <></>}
-      <h1>Rezervační kalendář</h1>
-      {tableMonths && tableMonths.map((month, idm) => {
-        return (
-          <div className="tableWrapper">
-            {month.name}
-            <TableContainer component={Paper} key={idm}>
-              <Table size="small" className="table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Datum</TableCell>
-                    <TableCell align="right">Město</TableCell>
-                    <TableCell align="right">Název</TableCell>
-                    <TableCell align="right">Projekt</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {month.days.map((row, idd) => {
-
-                    return (
-                      <TableRow
-                        key={idd + 12}
-                        className={row.email != "" ? "fullTableRow" : "tableRow"}
-                        onClick={row.email != "" ? () => {} : () => handleClick(row)}
-                      >
-                        {/*style={{borderBottom:"none"}}*/}
-                        <TableCell align="left" >{row.date.toLocaleDateString("cs-CZ")}</TableCell>
-                        <TableCell align="right">{row.city}</TableCell>
-                        <TableCell align="right">{row.name}</TableCell>
-                        <TableCell align="right">{row.project == true ? "Ano" : "Ne"}</TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </div>
-        )
-      })}
-    </div>
-  );
+    return (
+        <div className="App appWrapper">
+            {activeRow ?
+                <FormDialog
+                    setActiveRow={setActiveRow}
+                    activeRow={activeRow as Order}
+                />
+                :
+                <></>}
+            <h1>Rezervační kalendář</h1>
+            {tableMonths && tableMonths.map((month, idm) => {
+                return (
+                    <div className="tableWrapper">
+                        {month.name}
+                        <TableContainer component={Paper} key={idm}>
+                            <Table size="small" className="table">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell width="71px">Datum</TableCell>
+                                        <TableCell>Město</TableCell>
+                                        <TableCell>Název</TableCell>
+                                        <TableCell width="10px">Projekt</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {month.days.map((row, idd) => {
+                                        return (
+                                            <TableRow
+                                                key={idd + 12}
+                                                className={row.email != "" ? "fullTableRow" : "tableRow"}
+                                                onClick={row.email != "" ? () => { } : () => handleClick(row)}
+                                            >
+                                                {/*style={{borderBottom:"none"}}*/}
+                                                <TableCell>{formatDate(row.date)}</TableCell>
+                                                <TableCell>{row.city}</TableCell>
+                                                <TableCell>{row.name}</TableCell>
+                                                <TableCell align="center">{row.project == true ? <CheckIcon className="icon"/> : <CloseIcon className="icon"/>}</TableCell>
+                                            </TableRow>
+                                        )
+                                    })}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    </div>
+                )
+            })}
+        </div>
+    );
 })
 
 export default ReservationCalendar;
