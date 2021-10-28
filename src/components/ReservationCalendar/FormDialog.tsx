@@ -1,6 +1,6 @@
 import * as React from 'react';
-import { postOrder } from '../API/api'
-import { Order } from '../objects/objects'
+import { postOrder } from '../../API/api'
+import { Order } from '../../objects/objects'
 
 import Typography from '@mui/material/Typography';
 
