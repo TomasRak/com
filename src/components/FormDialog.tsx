@@ -58,6 +58,7 @@ export const FormDialog = ((props: FormDialogProps) => {
 
     const handleConfirm = () => {
         if (validateEditOrder(editOrder)) {
+            if (!editOrder.project) editOrder.project = false  
             console.log("postSucessfull?: ", postOrder(editOrder))
             setActiveRow(null);
         }
@@ -155,7 +156,7 @@ export const FormDialog = ((props: FormDialogProps) => {
                             <Checkbox
                                 value={editOrder.project}
                                 onChange={((e) => {
-                                    setEditOrder({ ...editOrder, project: e.target.value == '1' })
+                                    setEditOrder({ ...editOrder, project: e.target.checked })
                                 })}
                                 id="Projekt"
                             />

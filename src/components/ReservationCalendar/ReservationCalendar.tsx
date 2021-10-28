@@ -40,7 +40,7 @@ const ReservationCalendar = (() => {
                 for (var day = 1; day <= diM; day++) {
                     var newDate = new Date(`$${month}.${day}.2021 12:00:00`);
                     var maybeNewOrder = {
-                        date: newDate, city: "", name: "", email: "", phone: "", project: false, description: ""
+                        date: newDate, city: "", name: "", email: "", phone: "", project: null, description: ""
                     } as Order
 
                     for (var dbOrder of dbOrders as Order[]) {
@@ -105,8 +105,8 @@ const ReservationCalendar = (() => {
                                 <TableHead>
                                     <TableRow>
                                         <TableCell width="71px">Datum</TableCell>
-                                        <TableCell>Město</TableCell>
-                                        <TableCell>Název</TableCell>
+                                        <TableCell width="1000px">Město</TableCell>{/*XD*/}
+                                        <TableCell width="1000px">Název</TableCell>
                                         <TableCell width="10px">Projekt</TableCell>
                                     </TableRow>
                                 </TableHead>
@@ -122,7 +122,7 @@ const ReservationCalendar = (() => {
                                                 <TableCell>{formatDate(row.date)}</TableCell>
                                                 <TableCell>{row.city}</TableCell>
                                                 <TableCell>{row.name}</TableCell>
-                                                <TableCell align="center">{row.project == true ? <CheckIcon className="icon"/> : <CloseIcon className="icon"/>}</TableCell>
+                                                <TableCell align="center">{row.project ? row.project == true ? <CheckIcon className="icon"/> : <CloseIcon className="icon"/> : <></>}</TableCell>
                                             </TableRow>
                                         )
                                     })}

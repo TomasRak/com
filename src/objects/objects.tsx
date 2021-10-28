@@ -4,7 +4,7 @@ type Order = {
     name: string
     email: string
     phone: string
-    project: boolean
+    project?: boolean | null
     description: string
 }
 
