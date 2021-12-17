@@ -1,0 +1,39 @@
+.tableRow:hover {
+    /* transition: background-color .01s; */
+    background-color: #239ceb;
+    cursor: pointer;
+    /* cursor: not-allowed; */
+  }
+  
+  .tableRow {
+    /* font-size: 50px; */
+    background-color: #84c7f2;
+  }
+  
+  .fullTableRow {
+    background-color: #ff6666;
+  }
+  
+  .table {
+      white-space: nowrap;
+    /* width: 20px; */
+  }
+  .project {
+    float: left;
+    /* margin-left: -12px; */
+    margin-top: 5px;
+  }
+  
+  .icon {
+      width: 15px !important;
+      height: 15px !important;
+      margin-bottom: -3px;
+      transform: scale(1.5);
+      /* margin-top:2px; */
+  }
+
+  .tableWrapper {
+    width: 600px;
+    display: inline-grid;
+    margin: 10px;
+  }

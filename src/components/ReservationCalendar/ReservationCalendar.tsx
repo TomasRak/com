@@ -3,6 +3,7 @@ import { getOrders } from '../../API/api'
 
 import { FormDialog } from './FormDialog';
 import SimpleCalendar from './components/SimpleCalendar';
+import MUICalendar from './components/MUICalendar'
 
 import { Order, TableMonth } from '../../objects/objects';
 
@@ -23,6 +24,7 @@ const ReservationCalendar = (() => {
                 activeRow={activeRow}
                 setActiveRow={setActiveRow}
             />
+            {/* <MUICalendar/> */}
         </div>
     );
 })

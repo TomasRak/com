@@ -6,4 +6,8 @@ const formatDate = (d: Date) => {
             .padStart(2, '0')}.${d.getFullYear()}`;
 };
 
-export {formatDate}
+const daysInMonth = (month: number, year: number) => {
+    return new Date(year, month, 0).getDate();
+}
+
+export {formatDate, daysInMonth}

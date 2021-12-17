@@ -1,4 +1,5 @@
 import * as React from 'react';
+import './SimpleCalendar.css'
 
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -13,13 +14,10 @@ import CloseIcon from '@mui/icons-material/Close';
 import { Order, TableMonth } from '../../../objects/objects';
 
 import { getOrders } from '../../../API/api'
-import { formatDate } from '../../../helpers/helperMethods'
+import { formatDate, daysInMonth } from '../../../helpers/helperMethods'
 
 const monthsCzech = ["Leden", "Únor", "Březen", "Duben", "Květen", "Červen", "Červenec", "Srpen", "Září", "Říjen", "Listopad", "Prosinec"]
 
-const daysInMonth = (month: number, year: number) => {
-    return new Date(year, month, 0).getDate();
-}
 
 interface SimpleCalendarProps {
     activeRow: any
@@ -37,10 +35,10 @@ const SimpleCalendar = ((props: SimpleCalendarProps) => {
         if (dbOrders) {
             for (var month = 1; month <= 12; month++) {
                 var daysForMonth = new Array<Order>()
-                var diM = daysInMonth(month, 2021);
+                var diM = daysInMonth(month, 2022);
 
                 for (var day = 1; day <= diM; day++) {
-                    var newDate = new Date(`$${month}.${day}.2021 12:00:00`);
+                    var newDate = new Date(`$${month}.${day}.2022 12:00:00`);
                     var maybeNewOrder = {
                         date: newDate, city: "", name: "", email: "", phone: "", project: null, description: ""
                     } as Order
@@ -99,7 +97,7 @@ const SimpleCalendar = ((props: SimpleCalendarProps) => {
                                 <TableHead>
                                     <TableRow>
                                         <TableCell width="71px">Datum</TableCell>
-                                        <TableCell width="1000px">Město</TableCell>{/*XD*/}
+                                        <TableCell width="1000px">Město</TableCell>
                                         <TableCell width="1000px">Název</TableCell>
                                         <TableCell width="10px">Projekt</TableCell>
                                     </TableRow>

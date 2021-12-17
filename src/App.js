@@ -6,7 +6,7 @@ import ReservationCalendar from './components/ReservationCalendar/ReservationCal
 function App() {
     return (
         <div className="App appWrapper">
-            <div>Testovací verze</div>
+            {/* <div>Testovací verze</div> */}
             <ReservationCalendar />
         </div>
     );

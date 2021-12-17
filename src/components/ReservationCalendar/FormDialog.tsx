@@ -1,4 +1,6 @@
 import * as React from 'react';
+import './FormDialog.css'
+
 import { postOrder } from '../../API/api'
 import { Order } from '../../objects/objects'
 
