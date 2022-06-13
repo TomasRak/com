@@ -1,0 +1,7 @@
+.inputDiv {
+    display: inline;
+    width: 70%;
+    max-width: 800px;
+    float: left;
+    min-width: 310px;
+}
