@@ -40,7 +40,7 @@ const SimpleCalendar = ((props: SimpleCalendarProps) => {
                 for (var day = 1; day <= diM; day++) {
                     var newDate = new Date(`$${month}.${day}.2022 12:00:00`);
                     var maybeNewOrder = {
-                        date: newDate, city: "", name: "", email: "", phone: "", project: null, description: ""
+                        date: newDate, city: "", name: "", email: "", phone: "", project: false, description: ""
                     } as Order
 
                     for (var dbOrder of dbOrders as Order[]) {

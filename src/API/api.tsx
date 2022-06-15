@@ -16,9 +16,12 @@ const getOrders = (async () => {
     });
 })
 
-const postOrder = ((order: Order): boolean => {
+const postOrder = (async (order: Order): Promise<boolean> => {
+    order.date.setHours(12)
+    order.date.setMinutes(0)
+    // return new Promise((resolve: any, reject: any) => {return setTimeout(resolve, 1000)})
     try {
-        axios.post('/orders', order);
+        await axios.post('/orders', order);
         return true;
     }
     catch {

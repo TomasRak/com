@@ -8,17 +8,24 @@ import { DatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers'
 import DateFnsUtils from "@date-io/date-fns";
 import { cs } from "date-fns/locale";
 
-import { getOrders } from '../../API/api'
+import { getOrders, postOrder } from '../../API/api'
 
 import { FormDialog } from './FormDialog';
 import SimpleCalendar from './components/SimpleCalendar';
 
 import { Order, TableMonth } from '../../objects/objects';
 import { Checkbox, TextField } from '@mui/material';
-import { Button, Paper, Typography } from '@material-ui/core';
+import { Button, CircularProgress, LinearProgress, Paper, Snackbar, Typography } from '@material-ui/core';
+import MuiAlert from '@mui/material/Alert';
 
-var heh = {
-    date: new Date(),
+/* BUGS
+When todays date is sent, the calendar date stays on todays date, even though it is not selectable
+
+
+*/
+
+var editOrderEmpty = {
+    date: new Date(new Date().setDate(new Date().getDate() + 1)),
     city: "",
     name: "",
     email: "",
@@ -27,19 +34,29 @@ var heh = {
     description: "",
 } as Order
 
+const Alert = React.forwardRef(function Alert(props: any, ref: any) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 const ReservationCalendar = (() => {
-    var [editOrder, setEditOrder] = React.useState<Order>(heh)
-    var [dateSelected, setDateSelected] = React.useState(false)
+
+    var [editOrder, setEditOrder] = React.useState<Order>(editOrderEmpty)
+    var [snackbarData, setSnackbarData] = React.useState({ open: false, type: "error", message: "" })
 
     var [allOrders, setAllOrders] = React.useState<Order[]>()
 
     React.useEffect(() => {
         getOrders().then((resp: any) => {
-            // console.log(resp)
-            // await setTimeout(() => {}, 1000)
             setAllOrders(resp)
         })
     }, [])
+
+    const handleCloseSnackbar = (event: any, reason: any) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setSnackbarData({ open: false, type: snackbarData.type, message: snackbarData.message });
+    };
 
     const validateEditOrder = ((editOrder: Order): boolean => {
         var errorObj = {} as any
@@ -52,13 +69,26 @@ const ReservationCalendar = (() => {
         return isValid;
     })
 
-
-    const handleConfirm = () => {
-        // if (validateEditOrder(editOrder)) {
-        //     if (!editOrder.project) editOrder.project = false  
-        //     console.log("postSucessfull?: ", postOrder(editOrder))
-        //     setActiveRow(null);
-        // }
+    const handleConfirm = async () => {
+        if (validateEditOrder(editOrder)) {
+            if (!editOrder.project) editOrder.project = false
+            await postOrder(editOrder).then(async (resp: any) => {
+                console.log("response", resp)
+                if (resp === false) {
+                    setSnackbarData({ open: true, type: "error", message: "Nastala chyba, zkuste opakovat akci." });
+                    return
+                }
+                console.log("editOrderEmpty", editOrderEmpty)
+                await getOrders().then((resp: any) => {
+                    console.log("new orders came", resp)
+                    setAllOrders(resp)
+                    setEditOrder(editOrderEmpty);
+                })
+                setSnackbarData({ open: true, type: "success", message: "Informace úspěšně odeslány na server!" });
+            })
+        }
+        else
+            setSnackbarData({ open: true, type: "warning", message: "Některé údaje nebyly správně vyplněny!" });
     };
 
     var [editOrderErrors, setEditOrderErrors] = React.useState({
@@ -74,22 +104,25 @@ const ReservationCalendar = (() => {
     const autoComplete = false;
     return (
         <div style={{ display: "inline-block", margin: "30px" }}>
-            {allOrders && <div className="App appWrapper">
-                <Paper style={{ padding: "10px", height: "495px" }} elevation={1}>
+            <h1>Rezervační kalendář</h1>
+            {allOrders ? <div className="App appWrapper">
+                <Paper style={{ padding: "10px", height: `${495 + Object.values(editOrderErrors).filter((x: boolean) => x).length * 23}px`/*495px ideally */ }} elevation={1}>
                     <div style={{ display: "inline-block", float: "left", marginRight: "20px", marginBottom: "10px" }}>
 
-                        <Paper style={{ padding: "10px", height: "475px" }} elevation={5}>
+                        <Paper style={{
+                            padding: "10px"
+                            , height: `${475 + Object.values(editOrderErrors).filter((x: boolean) => x).length * 23}px`/*475px ideally */
+                        }} elevation={5}>
                             <MuiPickersUtilsProvider locale={cs} utils={DateFnsUtils}>
                                 <DatePicker
                                     variant={"static"}
-                                    minDate={new Date()}
+                                    minDate={new Date(new Date().setDate(new Date().getDate() + 1))}
                                     // labelFunc={(x: any) => x.toLocaleString("cs", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-                                        // `${x.getDate()}${x.getMonth()}`
+                                    // `${x.getDate()}${x.getMonth()}`
                                     // }
                                     value={editOrder.date}
                                     onChange={(x: any) => {
                                         setEditOrder({ ...editOrder, date: x })
-                                        setDateSelected(true)
                                     }}
                                     shouldDisableDate={(x: any) => {
                                         // var now = new Date()
@@ -120,6 +153,7 @@ const ReservationCalendar = (() => {
                             margin="dense"
                             id="mesto"
                             label="Město"
+                            // autoFocus
                             fullWidth
                             variant="outlined"
                             required={true}
@@ -134,10 +168,10 @@ const ReservationCalendar = (() => {
                             })}
                             error={editOrderErrors.name}
                             helperText={editOrderErrors.name ? "Název musí být vyplněn!" : ""}
-                            autoFocus
+                            // autoFocus
                             margin="dense"
                             id="nazev"
-                            label="Název"
+                            label="Název školy"
                             fullWidth
                             variant="outlined"
                             required={true}
@@ -151,7 +185,7 @@ const ReservationCalendar = (() => {
                             })}
                             error={editOrderErrors.email}
                             helperText={editOrderErrors.email ? "Email musí být vyplněn!" : ""}
-                            autoFocus
+                            // autoFocus
                             margin="dense"
                             id="mail"
                             label="Email"
@@ -165,7 +199,7 @@ const ReservationCalendar = (() => {
                             onChange={((e) => {
                                 setEditOrder({ ...editOrder, phone: e.target.value })
                             })}
-                            autoFocus
+                            // autoFocus
                             margin="dense"
                             id="telefon"
                             label="Telefon"
@@ -178,7 +212,7 @@ const ReservationCalendar = (() => {
                             onChange={((e) => {
                                 setEditOrder({ ...editOrder, description: e.target.value })
                             })}
-                            autoFocus
+                            // autoFocus
                             margin="dense"
                             id="popis"
                             label="Popis"
@@ -189,7 +223,7 @@ const ReservationCalendar = (() => {
                         />
                         <div style={{ float: "left", marginTop: "8px" }}>
                             <Checkbox
-                                value={editOrder.project}
+                                checked={editOrder.project}
                                 onChange={((e) => {
                                     setEditOrder({ ...editOrder, project: e.target.checked })
                                 })}
@@ -201,12 +235,18 @@ const ReservationCalendar = (() => {
                             <Button
                                 variant={"contained"}
                                 onClick={handleConfirm}>
-                                Potvrdit
+                                Odeslat
                             </Button>
                         </div>
                     </div>
                 </Paper>
-            </div>}
+            </div> : <CircularProgress />}
+
+            <Snackbar open={snackbarData.open} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+                <Alert onClose={handleCloseSnackbar} severity={snackbarData.type} sx={{ width: '100%' }}>
+                    {snackbarData.message}
+                </Alert>
+            </Snackbar>
         </div>
     );
 })
