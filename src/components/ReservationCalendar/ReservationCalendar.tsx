@@ -107,8 +107,7 @@ const ReservationCalendar = (() => {
             <h1>Rezervační kalendář</h1>
             {allOrders ? <div className="App appWrapper">
                 <Paper style={{ padding: "10px", height: `${495 + Object.values(editOrderErrors).filter((x: boolean) => x).length * 23}px`/*495px ideally */ }} elevation={1}>
-                    <div style={{ display: "inline-block", float: "left", marginRight: "20px", marginBottom: "10px" }}>
-
+                    <div style={{ display: "inline-block", float: "left", marginRight: "20px", marginBottom: "10px", userSelect: "none" }}>
                         <Paper style={{
                             padding: "10px"
                             , height: `${475 + Object.values(editOrderErrors).filter((x: boolean) => x).length * 23}px`/*475px ideally */
@@ -117,19 +116,12 @@ const ReservationCalendar = (() => {
                                 <DatePicker
                                     variant={"static"}
                                     minDate={new Date(new Date().setDate(new Date().getDate() + 1))}
-                                    // labelFunc={(x: any) => x.toLocaleString("cs", { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-                                    // `${x.getDate()}${x.getMonth()}`
-                                    // }
                                     value={editOrder.date}
                                     onChange={(x: any) => {
                                         setEditOrder({ ...editOrder, date: x })
                                     }}
                                     shouldDisableDate={(x: any) => {
-                                        // var now = new Date()
-                                        // if (now.getFullYear() === x.getFullYear() && now.getMonth() === x.getMonth() && now.getDate() === x.getDate()){
-                                        //     console.log("dateFayl", x)
-                                        //     return true
-                                        // }
+                                        if (x.getMonth() === 11) return true;
 
                                         if (allOrders !== undefined)
                                             return (allOrders?.filter((f: any) => f.date.getFullYear() === x.getFullYear() && f.date.getMonth() === x.getMonth() && f.date.getDate() === x.getDate()).length > 0)
