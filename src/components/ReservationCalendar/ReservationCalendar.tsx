@@ -139,8 +139,8 @@ const ReservationCalendar = (() => {
 
     const autoComplete = false;
     return (
-        <div style={{ display: "inline-block", marginBottom:"30px"}}>
-            <h1 style={{margin: isMobile ? "15px" : "60px"}}>Rezervační {isMobile ? <br></br> : <></>} kalendář</h1>
+        <div style={{ display: "inline-block", marginBottom: "30px" }}>
+            <h1 style={{ margin: isMobile ? "15px" : "60px" }}>Rezervační {isMobile ? <br></br> : <></>} kalendář</h1>
             {allOrders ? <div className="App appWrapper">
                 <Paper style={{ width: isMobile ? "330px" : "", padding: "10px", height: `${(isMobile ? 1054 : 535) + Object.values(editOrderErrors).filter((x: boolean) => x).length * 23}px`/*495px ideally */ }} elevation={1}>
                     <div style={{ display: "inline-block", float: "left", marginRight: "20px", marginBottom: "10px", userSelect: "none" }}>
@@ -215,7 +215,7 @@ const ReservationCalendar = (() => {
                             value={editOrder.classCounts}
                             SelectProps={{
                                 renderValue: (selected: any) => {
-                                    return selected.map((x: any) => `${x.class} = ${x.count} dětí`).join(', ')
+                                    return selected.map((x: any) => `${x.class} = ${isNaN(x.count) ? 0 : x.count} dětí`).join(', ')
                                 },
                                 autoWidth: true
                             }}
@@ -274,20 +274,20 @@ const ReservationCalendar = (() => {
                                         })}
                                     </TextField>
                                     <TextField
+                                        InputLabelProps={{ shrink: true }}
                                         label="Počet"
                                         type="number"
                                         style={{ width: "75px" }}
-                                        value={editOrder.classCounts.find((x) => x.class == classCount.class)?.count}
+                                        value={classCount.count}
                                         onChange={(e) => {
-                                            e.target.value = e.target.value.replace(/^0+/, "")
+                                            if (e.target.value == "-1" || e.target.value.length > 2) return
+                                            e.target.value = e.target.value.replace(/^0+|-/, "")
                                             var value = parseInt(e.target.value);
-                                            if (isNaN(value) || value < 1) value = 1;
-                                            if (value > 99) value = 99
 
                                             var newOrder = { ...editOrder };
                                             newOrder.classCounts.map((x) => {
                                                 if (x.class == classCount.class)
-                                                    x.count = +value
+                                                    x.count = value
                                             })
                                             setEditOrder(newOrder)
                                         }} />
@@ -350,7 +350,7 @@ const ReservationCalendar = (() => {
                             multiline={true}
                             rows={5}
                         />
-                        <div style={{ float: "left", marginTop: "2px", display:"inline-flex" }}>
+                        <div style={{ float: "left", marginTop: "2px", display: "inline-flex" }}>
                             <Checkbox
                                 checked={editOrder.project}
                                 onChange={((e) => {

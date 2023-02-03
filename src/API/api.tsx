@@ -19,9 +19,11 @@ const getOrders = (async () => {
 const postOrder = (async (order: Order): Promise<boolean> => {
     order.date.setHours(12)
     order.date.setMinutes(0)
+    order.classCounts = order.classCounts.filter((x) => !isNaN(x.count as number))
     order.description = order.description + "\n\nPočty dětí: \n" + order.classCounts.map((x) => `${x.class} = ${x.count} dětí`).join('\n')
 
-    // return new Promise((resolve: any, reject: any) => {return setTimeout(resolve, 1000)})
+    // console.log("order", order)
+    // return new Promise((resolve: any, reject: any) => { return setTimeout(resolve, 1000) })
 
     try {
         await axios.post('/orders', order);
