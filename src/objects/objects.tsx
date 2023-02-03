@@ -6,6 +6,12 @@ type Order = {
     phone: string
     project: boolean
     description: string
+    classCounts: ClassCount[]
+}
+
+type ClassCount = {
+    class: string
+    count: number
 }
 
 type TableMonth = {
@@ -14,4 +20,5 @@ type TableMonth = {
     days: Order[]
 }
 
-export type { Order, TableMonth }
+
+export type { Order, TableMonth, ClassCount }

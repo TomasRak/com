@@ -13,16 +13,23 @@ import { getOrders, postOrder } from '../../API/api'
 import { FormDialog } from './FormDialog';
 import SimpleCalendar from './components/SimpleCalendar';
 
-import { Order, TableMonth } from '../../objects/objects';
-import { Checkbox, TextField } from '@mui/material';
-import { Button, CircularProgress, LinearProgress, Paper, Snackbar, Typography } from '@material-ui/core';
+import { Order, TableMonth, ClassCount } from '../../objects/objects';
+import { Checkbox, SxProps, TextField } from '@mui/material';
+import { Select, MenuItem, InputLabel, ListItemText } from '@mui/material';
+import { Button, CircularProgress, LinearProgress, Paper, Snackbar, Typography, Chip, IconButton } from '@material-ui/core';
+import AddIcon from '@mui/icons-material/Add';
+import ClearIcon from '@mui/icons-material/Clear';
+import DeleteIcon from '@mui/icons-material/Delete';
 import MuiAlert from '@mui/material/Alert';
+import { makeStyles, createStyles } from '@material-ui/core/styles';
 
 /* BUGS
 When todays date is sent, the calendar date stays on todays date, even though it is not selectable
 
 
 */
+
+var classOptions = ["MŠ", "1. třída ZŠ", "2. třída ZŠ", "3. třída ZŠ", "4. třída ZŠ", "5. třída ZŠ", "6. třída ZŠ", "7. třída ZŠ", "8. třída ZŠ", "9. třída ZŠ", "SŠ"]
 
 var editOrderEmpty = {
     date: new Date(new Date().setDate(new Date().getDate() + 1)),
@@ -32,18 +39,46 @@ var editOrderEmpty = {
     phone: "",
     project: false,
     description: "",
+    classCounts: []
 } as Order
 
 const Alert = React.forwardRef(function Alert(props: any, ref: any) {
     return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
+const useStyles = makeStyles(() =>
+    createStyles({
+        picker: {
+            '& .MuiPickersBasePicker-pickerView': {
+                justifyContent: "start !important",
+                height: "420px"
+            }
+        },
+        pickerMobile: {
+            '& .MuiPickersBasePicker-pickerView': {
+                justifyContent: "start !important",
+                height: "320px"
+            }
+        },
+    })
+);
+
 const ReservationCalendar = (() => {
+    const classes = useStyles();
 
     var [editOrder, setEditOrder] = React.useState<Order>(editOrderEmpty)
     var [snackbarData, setSnackbarData] = React.useState({ open: false, type: "error", message: "" })
 
     var [allOrders, setAllOrders] = React.useState<Order[]>()
+
+    var [isMobile, setIsMobile] = React.useState(window.innerWidth < 1200);
+    React.useEffect(() => {
+        function handleResize() {
+            setIsMobile(window.innerWidth < 1200);
+        }
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     React.useEffect(() => {
         getOrders().then((resp: any) => {
@@ -82,6 +117,7 @@ const ReservationCalendar = (() => {
                 await getOrders().then((resp: any) => {
                     console.log("new orders came", resp)
                     setAllOrders(resp)
+                    editOrderEmpty.classCounts = [];
                     setEditOrder(editOrderEmpty);
                 })
                 setSnackbarData({ open: true, type: "success", message: "Informace úspěšně odeslány na server!" });
@@ -103,31 +139,35 @@ const ReservationCalendar = (() => {
 
     const autoComplete = false;
     return (
-        <div style={{ display: "inline-block", margin: "30px" }}>
-            <h1>Rezervační kalendář</h1>
+        <div style={{ display: "inline-block", marginBottom:"30px"}}>
+            <h1 style={{margin: isMobile ? "15px" : "60px"}}>Rezervační {isMobile ? <br></br> : <></>} kalendář</h1>
             {allOrders ? <div className="App appWrapper">
-                <Paper style={{ padding: "10px", height: `${495 + Object.values(editOrderErrors).filter((x: boolean) => x).length * 23}px`/*495px ideally */ }} elevation={1}>
+                <Paper style={{ width: isMobile ? "330px" : "", padding: "10px", height: `${(isMobile ? 1054 : 535) + Object.values(editOrderErrors).filter((x: boolean) => x).length * 23}px`/*495px ideally */ }} elevation={1}>
                     <div style={{ display: "inline-block", float: "left", marginRight: "20px", marginBottom: "10px", userSelect: "none" }}>
                         <Paper style={{
                             padding: "10px"
-                            , height: `${475 + Object.values(editOrderErrors).filter((x: boolean) => x).length * 23}px`/*475px ideally */
+                            , height: isMobile ? undefined : `${515 + Object.values(editOrderErrors).filter((x: boolean) => x).length * 23}px`/*467px ideally */,
+                            fontSize: isMobile ? undefined : `${45}px`
                         }} elevation={5}>
                             <MuiPickersUtilsProvider locale={cs} utils={DateFnsUtils}>
-                                <DatePicker
-                                    variant={"static"}
-                                    minDate={new Date(new Date().setDate(new Date().getDate() + 1))}
-                                    value={editOrder.date}
-                                    onChange={(x: any) => {
-                                        setEditOrder({ ...editOrder, date: x })
-                                    }}
-                                    shouldDisableDate={(x: any) => {
-                                        if (x.getMonth() === 11) return true;
+                                <div className={isMobile ? classes.pickerMobile : classes.picker}>
+                                    <DatePicker
+                                        variant={"static"}
+                                        size="medium"
+                                        minDate={new Date(new Date().setDate(new Date().getDate() + 1))}
+                                        value={editOrder.date}
+                                        onChange={(x: any) => {
+                                            setEditOrder({ ...editOrder, date: x })
+                                        }}
+                                        shouldDisableDate={(x: any) => {
+                                            if (x.getMonth() === 11) return true;
 
-                                        if (allOrders !== undefined)
-                                            return (allOrders?.filter((f: any) => f.date.getFullYear() === x.getFullYear() && f.date.getMonth() === x.getMonth() && f.date.getDate() === x.getDate()).length > 0)
-                                        else throw ("Impossible happended")
-                                    }}
-                                />
+                                            if (allOrders !== undefined)
+                                                return (allOrders?.filter((f: any) => f.date.getFullYear() === x.getFullYear() && f.date.getMonth() === x.getMonth() && f.date.getDate() === x.getDate()).length > 0)
+                                            else throw ("Impossible happended")
+                                        }}
+                                    />
+                                </div>
                             </MuiPickersUtilsProvider>
                         </Paper>
                     </div>
@@ -149,7 +189,7 @@ const ReservationCalendar = (() => {
                             fullWidth
                             variant="outlined"
                             required={true}
-                            style={{ marginTop: 0 }}
+                            style={{ marginTop: isMobile ? 10 : 0 }}
                         />
                         <TextField
                             autoComplete={autoComplete ? 'on' : 'off'}
@@ -168,6 +208,103 @@ const ReservationCalendar = (() => {
                             variant="outlined"
                             required={true}
                         />
+                        <TextField
+                            label="Třídy a počty dětí"
+                            id="tridy"
+                            InputLabelProps={{ shrink: editOrder.classCounts.length > 0 ? true : false }}
+                            value={editOrder.classCounts}
+                            SelectProps={{
+                                renderValue: (selected: any) => {
+                                    return selected.map((x: any) => `${x.class} = ${x.count} dětí`).join(', ')
+                                },
+                                autoWidth: true
+                            }}
+                            select
+                            fullWidth
+                            margin="dense"
+                        >
+                            <Button
+                                fullWidth
+                                disableRipple
+                                variant="contained"
+                                style={{ width: "264px", marginLeft: "16px", marginRight: "16px", marginBottom: "10px" }}
+                                onClick={() => {
+                                    var newOrder = { ...editOrder };
+
+                                    var firstUnusedClass = classOptions.find((x) => !newOrder.classCounts.some((f) => x == f.class))
+                                    if (firstUnusedClass == undefined) return;
+
+                                    newOrder.classCounts.push({ count: 25, class: firstUnusedClass } as ClassCount)
+                                    setEditOrder(newOrder)
+                                }}
+                            >
+                                <AddIcon />
+                                Přidat třídu
+                            </Button>
+                            {editOrder.classCounts.map((classCount) => (
+                                <MenuItem
+                                    style={{ marginTop: "8px", backgroundColor: "transparent", cursor: "default" }}
+                                    disableRipple
+
+                                    selected={false}
+                                    onKeyDown={(e) => { e.stopPropagation() }}
+                                >
+                                    <TextField
+                                        select
+                                        label="Třída"
+                                        style={{ width: "125px", marginRight: "15px" }}
+                                        value={classCount.class}
+                                        onChange={(e) => {
+                                            var value = e.target.value;
+                                            var newOrder = { ...editOrder };
+
+                                            newOrder.classCounts.map((x) => {
+                                                if (x.class == classCount.class)
+                                                    x.class = value
+                                                else
+                                                    return x;
+                                            })
+                                            setEditOrder(newOrder)
+
+                                        }}
+                                    >
+                                        {classOptions.map((f) => {
+                                            if (f !== classCount.class && editOrder.classCounts.some((x) => x.class == f)) return
+                                            return (<MenuItem value={f}>{f}</MenuItem>)
+                                        })}
+                                    </TextField>
+                                    <TextField
+                                        label="Počet"
+                                        type="number"
+                                        style={{ width: "75px" }}
+                                        value={editOrder.classCounts.find((x) => x.class == classCount.class)?.count}
+                                        onChange={(e) => {
+                                            e.target.value = e.target.value.replace(/^0+/, "")
+                                            var value = parseInt(e.target.value);
+                                            if (isNaN(value) || value < 1) value = 1;
+                                            if (value > 99) value = 99
+
+                                            var newOrder = { ...editOrder };
+                                            newOrder.classCounts.map((x) => {
+                                                if (x.class == classCount.class)
+                                                    x.count = +value
+                                            })
+                                            setEditOrder(newOrder)
+                                        }} />
+                                    <IconButton
+                                        // style={{ scale: "1.6" }}
+                                        onClick={() => {
+                                            var newOrder = { ...editOrder };
+                                            newOrder.classCounts = newOrder.classCounts.filter((x) => x.class !== classCount.class)
+                                            setEditOrder(newOrder)
+                                        }}>
+                                        {/* <ClearIcon />  */}
+                                        <DeleteIcon />
+                                    </IconButton>
+                                    <div style={{ backgroundColor: "#c5c5c5", width: "94%", height: "1px", position: "absolute", top: "-10%", left: "3%" }}></div>
+                                </MenuItem>
+                            ))}
+                        </TextField>
                         <TextField
                             autoComplete={autoComplete ? 'on' : 'off'}
                             value={editOrder.email}
@@ -211,9 +348,9 @@ const ReservationCalendar = (() => {
                             fullWidth
                             variant="outlined"
                             multiline={true}
-                            rows={6}
+                            rows={5}
                         />
-                        <div style={{ float: "left", marginTop: "8px" }}>
+                        <div style={{ float: "left", marginTop: "2px", display:"inline-flex" }}>
                             <Checkbox
                                 checked={editOrder.project}
                                 onChange={((e) => {
@@ -221,10 +358,11 @@ const ReservationCalendar = (() => {
                                 })}
                                 id="Projekt"
                             />
-                            <Typography style={{ display: "inline" }}>Jedná se o přednášku v rámci "Projektových dnů"?</Typography>
+                            <Typography style={{ display: "inline", marginTop: "9px" }}>Jedná se o přednášku v rámci "Projektových dnů"?</Typography>
                         </div>
-                        <div style={{ float: "right", marginTop: "8px" }}>
+                        <div style={{ float: "right", marginTop: "4px", width: isMobile ? "100%" : "" }}>
                             <Button
+                                style={{ width: isMobile ? "100%" : "" }}
                                 variant={"contained"}
                                 onClick={handleConfirm}>
                                 Odeslat
